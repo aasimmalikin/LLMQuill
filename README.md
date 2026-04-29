@@ -1,56 +1,234 @@
-# {{crew_name}} Crew
+# 🪶 LLMQuill
 
-Welcome to the {{crew_name}} Crew project, powered by [crewAI](https://crewai.com). This template is designed to help you set up a multi-agent AI system with ease, leveraging the powerful and flexible framework provided by crewAI. Our goal is to enable your agents to collaborate effectively on complex tasks, maximizing their collective intelligence and capabilities.
+> An AI-powered multi-agent content pipeline that autonomously **writes** and **reviews** educational content — section by section, with full consistency tracking.
 
-## Installation
+![Python](https://img.shields.io/badge/Python-3.13-blue?logo=python)
+![CrewAI](https://img.shields.io/badge/CrewAI-1.14.3-blueviolet)
+![LLM](https://img.shields.io/badge/LLM-GPT--4o--mini-green?logo=openai)
+![Architecture](https://img.shields.io/badge/Architecture-Multi--Agent%20Flow-orange)
 
-Ensure you have Python >=3.10 <3.14 installed on your system. This project uses [UV](https://docs.astral.sh/uv/) for dependency management and package handling, offering a seamless setup and execution experience.
 
-First, if you haven't already, install uv:
+---
+
+## 🧠 What is LLMQuill?
+
+**LLMQuill** is a multi-agent LLM pipeline built on [CrewAI](https://crewai.com) that generates high-quality, structured educational content using a **write → review** agentic flow.
+
+Two specialized AI agents collaborate on every section:
+
+| Agent | Role | Responsibility |
+|---|---|---|
+| ✍️ **Content Writer** | Educational Content Writer | Drafts 500–800 word Markdown sections with examples, structure, and summaries |
+| 🔍 **Content Reviewer** | Content Reviewer & Editor | Polishes drafts for grammar, clarity, accuracy, and cross-section consistency |
+
+Each section is aware of **previously written content**, ensuring the final output reads as a cohesive, well-structured guide.
+
+---
+
+## 🔄 Agent Flow
+
+```
+Input: section_title + section_description
+              │
+              ▼
+   ┌──────────────────────┐
+   │   write_section_task  │  ←  Content Writer Agent
+   │   (500–800 words,     │
+   │    Markdown format)   │
+   └──────────┬───────────┘
+              │  draft_content
+              ▼
+   ┌──────────────────────┐
+   │  review_section_task  │  ←  Content Reviewer Agent
+   │  (polish, fix, refine)│
+   │  context: write_task  │
+   └──────────┬───────────┘
+              │
+              ▼
+       ✅ Final Polished Section
+            (saved to output/)
+```
+
+---
+
+## 🤖 Agents
+
+### ✍️ Content Writer
+
+```yaml
+role: Educational Content Writer
+goal: >
+  Create engaging, informative content that thoroughly explains
+  the assigned topic and provides valuable insights to the reader
+llm: openai/gpt-4o-mini
+```
+
+Specializes in breaking down complex concepts into accessible language. Each section includes:
+- Brief topic introduction
+- Key concepts with examples
+- Practical applications or exercises
+- Summary of key points
+
+---
+
+### 🔍 Content Reviewer
+
+```yaml
+role: Educational Content Reviewer and Editor
+goal: >
+  Ensure content is accurate, comprehensive, well-structured,
+  and maintains consistency with previously written sections
+llm: openai/gpt-4o-mini
+```
+
+Acts as a meticulous editor ensuring:
+- Grammar and spelling corrections
+- Improved clarity and readability
+- Factual accuracy and completeness
+- Consistency with prior sections
+- Better structure and flow
+
+---
+
+## 🚀 Getting Started
+
+### Prerequisites
+
+- Python `>=3.13`
+- [uv](https://docs.astral.sh/uv/) for dependency management
+
+### 1. Clone the Repository
+
+```bash
+git clone https://github.com/your-username/LLMQuill.git
+cd LLMQuill
+```
+
+### 2. Install uv (if not already installed)
 
 ```bash
 pip install uv
 ```
 
-Next, navigate to your project directory and install the dependencies:
+### 3. Install Dependencies
 
-(Optional) Lock the dependencies and install them by using the CLI command:
 ```bash
 crewai install
 ```
 
-### Customizing
+Or directly with uv:
 
-**Add your `OPENAI_API_KEY` into the `.env` file**
+```bash
+uv sync
+```
 
-- Modify `src/creator_flow/config/agents.yaml` to define your agents
-- Modify `src/creator_flow/config/tasks.yaml` to define your tasks
-- Modify `src/creator_flow/crew.py` to add your own logic, tools and specific args
-- Modify `src/creator_flow/main.py` to add custom inputs for your agents and tasks
+### 4. Configure Environment Variables
 
-## Running the Project
+Create a `.env` file in the root directory:
 
-To kickstart your flow and begin execution, run this from the root folder of your project:
+```env
+OPENAI_API_KEY=your_openai_api_key_here
+MODEL=gpt-4o-mini
+```
+
+> ⚠️ Never commit your `.env` file. It is already listed in `.gitignore`.
+
+### 5. Run the Flow
 
 ```bash
 crewai run
 ```
 
-This command initializes the creator_flow Flow as defined in your configuration.
+The output will be saved to `output/post.md`.
 
-This example, unmodified, will run a content creation flow on AI Agents and save the output to `output/post.md`.
+---
 
-## Understanding Your Crew
+## 📁 Project Structure
 
-The creator_flow Crew is composed of multiple AI agents, each with unique roles, goals, and tools. These agents collaborate on a series of tasks, defined in `config/tasks.yaml`, leveraging their collective skills to achieve complex objectives. The `config/agents.yaml` file outlines the capabilities and configurations of each agent in your crew.
+```
+LLMQuill/
+├── src/
+│   └── creator_flow/
+│       ├── config/
+│       │   ├── agents.yaml        # Agent roles, goals & LLM config
+│       │   └── tasks.yaml         # Task definitions & context wiring
+│       ├── crew.py                # Crew assembly logic
+│       └── main.py                # Entry points (kickoff, plot, etc.)
+├── output/                        # Generated content saved here
+├── .env                           # API keys (never commit)
+├── .gitignore
+├── .python-version                # Python 3.13
+├── pyproject.toml                 # Project metadata & dependencies
+├── uv.lock                        # Locked dependency versions
+└── AGENTS.md                      # CrewAI reference for AI coding assistants
+```
 
-## Support
+---
 
-For support, questions, or feedback regarding the {{crew_name}} Crew or crewAI.
+## 🛠️ Available Commands
 
-- Visit our [documentation](https://docs.crewai.com)
-- Reach out to us through our [GitHub repository](https://github.com/joaomdmoura/crewai)
-- [Join our Discord](https://discord.com/invite/X4JWnZnxPb)
-- [Chat with our docs](https://chatg.pt/DWjSBZn)
+| Command | Description |
+|---|---|
+| `crewai run` | Run the full content generation flow |
+| `crewai flow kickoff` | Alternative flow execution |
+| `crewai flow plot` | Visualize the agent flow as an HTML diagram |
+| `crewai test` | Run crew tests (default: 2 iterations) |
+| `crewai train -n 5` | Train the crew over N iterations |
+| `crewai replay -t <id>` | Replay from a specific task |
+| `crewai reset-memories -a` | Reset all agent memories |
 
-Let's create wonders together with the power and simplicity of crewAI.
+---
+
+## ⚙️ Configuration
+
+### Customizing Agents
+
+Edit `src/creator_flow/config/agents.yaml` to change agent roles, goals, backstories, or switch LLM models.
+
+### Customizing Tasks
+
+Edit `src/creator_flow/config/tasks.yaml` to change task descriptions, expected outputs, or context dependencies.
+
+### Switching LLM Models
+
+Update the `llm` field in `agents.yaml`:
+
+```yaml
+content_writer:
+  llm: openai/gpt-4o        # Upgrade to GPT-4o
+  # llm: anthropic/claude-3-5-sonnet  # Or use Claude
+```
+
+---
+
+## 📦 Dependencies
+
+```toml
+requires-python = ">=3.13"
+dependencies = [
+    "crewai[tools]==1.14.3"
+]
+```
+
+---
+
+## 🏷️ Topics
+
+`llm` `ai-agents` `multi-agent` `crewai` `content-generation` `gpt-4o-mini` `educational-content` `agentic-ai` `openai` `automation` `python`
+
+---
+
+## 🤝 Support & Resources
+
+- 📘 [CrewAI Documentation](https://docs.crewai.com)
+- 💬 [Join the CrewAI Discord](https://discord.com/invite/X4JWnZnxPb)
+- 🐛 [Report Issues](https://github.com/your-username/LLMQuill/issues)
+- ⭐ If you find this useful, give it a star on GitHub!
+
+---
+
+
+
+---
+
+> Built with ❤️ using [CrewAI](https://crewai.com) and OpenAI's GPT-4o-mini.
